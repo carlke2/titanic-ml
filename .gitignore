@@ -1,0 +1,44 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Environment variables (keep .env.example, ignore actual .env)
+.env
+
+# macOS metadata
+.DS_Store
+
+# Compressed data files
+data/*.zip
+data/*.tar.gz
+data/*.gz
+
+# Generated reports
+reports/*.html
+reports/*.pdf
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# -----------------------------------------------
+# Explicitly track these (do NOT ignore):
+# data/train.csv
+# data/test.csv
+# data/gender_submission.csv
+# submissions/.gitkeep
+# reports/.gitkeep
+# -----------------------------------------------

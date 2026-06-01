@@ -58,7 +58,6 @@ def build_baseline_model(model_type: str = "random_forest") -> object:
             max_depth=4,
             subsample=0.8,
             colsample_bytree=0.8,
-            use_label_encoder=False,
             eval_metric="logloss",
             random_state=42,
             n_jobs=-1,
@@ -66,7 +65,7 @@ def build_baseline_model(model_type: str = "random_forest") -> object:
     elif model_type == "voting":
         rf  = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42, n_jobs=-1)
         gb  = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42)
-        xgb = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=4, use_label_encoder=False,
+        xgb = XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=4,
                             eval_metric="logloss", random_state=42, n_jobs=-1)
         return VotingClassifier(
             estimators=[("rf", rf), ("gb", gb), ("xgb", xgb)],

@@ -146,6 +146,80 @@ def create_age_band(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def create_deck(df: pd.DataFrame) -> pd.DataFrame:
+    """Extract the deck letter from the Cabin column and encode it.
+
+    Passengers on higher decks (A, B, C) had different survival rates than lower decks.
+    Missing cabins are mapped to 'U' (Unknown).
+
+    Parameters
+    ----------
+    df : pd.DataFrame  Must contain 'Cabin' column.
+
+    Returns
+    -------
+    pd.DataFrame with new 'Deck' (int) column.
+    """
+    df = df.copy()
+    # Extract first letter of Cabin
+    df["Deck"] = df["Cabin"].str[0].fillna("U")
+    # Encode decks to integers. T is a very rare deck, mapped to 8.
+    deck_map = {"U": 0, "A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "F": 6, "G": 7, "T": 8}
+    df["Deck"] = df["Deck"].map(deck_map).fillna(0).astype(int)
+    return df
+
+
+def create_ticket_group_size(df: pd.DataFrame) -> pd.DataFrame:
+    """Count how many passengers share the same Ticket number.
+
+    This helps identify groups of friends or nannies travelling together
+    who do not share a surname or FamilySize.
+
+    Parameters
+    ----------
+    df : pd.DataFrame  Must contain 'Ticket' column.
+
+    Returns
+    -------
+    pd.DataFrame with new 'TicketGroupSize' (int) column.
+    """
+    df = df.copy()
+    ticket_counts = df["Ticket"].value_counts()
+    df["TicketGroupSize"] = df["Ticket"].map(ticket_counts).fillna(1).astype(int)
+    return df
+
+
+def create_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Create specific interaction terms like Sex * Pclass.
+
+    Since 'women and children first' was strictly enforced in 1st/2nd class
+    but less so in 3rd class, the interaction of Sex and Pclass is powerful.
+
+    Parameters
+    ----------
+    df : pd.DataFrame  Must contain 'Sex' and 'Pclass' columns.
+
+    Returns
+    -------
+    pd.DataFrame with new 'Sex_Pclass' (int) column.
+    """
+    df = df.copy()
+    # Create string representation, e.g., "female_1"
+    df["Sex_Pclass"] = df["Sex"].astype(str) + "_" + df["Pclass"].astype(str)
+    
+    # Map to an ordinal priority (highest survival odds = 6, lowest = 1)
+    sex_pclass_map = {
+        "female_1": 6, 
+        "female_2": 5, 
+        "female_3": 4, 
+        "male_1": 3, 
+        "male_2": 2, 
+        "male_3": 1
+    }
+    df["Sex_Pclass"] = df["Sex_Pclass"].map(sex_pclass_map).fillna(0).astype(int)
+    return df
+
+
 def select_features(df: pd.DataFrame) -> list:
     """Return the final list of feature column names for modelling.
 
@@ -165,6 +239,9 @@ def select_features(df: pd.DataFrame) -> list:
         "FamilySize",
         "IsAlone",
         "Title",
+        "Deck",
+        "TicketGroupSize",
+        "Sex_Pclass",
         "Embarked_Q",
         "Embarked_S",
         "SibSp",
@@ -191,4 +268,7 @@ def engineer(df: pd.DataFrame) -> pd.DataFrame:
     df = create_is_alone(df)
     df = create_fare_band(df)
     df = create_age_band(df)
+    df = create_deck(df)
+    df = create_ticket_group_size(df)
+    df = create_interaction_features(df)
     return df

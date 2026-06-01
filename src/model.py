@@ -76,6 +76,29 @@ def build_baseline_model(model_type: str = "random_forest") -> object:
                          f"Choose from: random_forest, logistic_regression, gradient_boosting, xgboost, voting.")
 
 
+def build_tuned_voting_classifier(tuned_estimators: dict) -> VotingClassifier:
+    """Wrap pre-tuned estimators into a soft-voting ensemble.
+
+    Parameters
+    ----------
+    tuned_estimators : dict
+        Dict with keys 'rf', 'gb', 'xgb' mapping to fitted estimators
+        (as returned by src.tuning.run_all_tuning).
+
+    Returns
+    -------
+    Unfitted VotingClassifier built from clones of the tuned estimators.
+    """
+    from sklearn.base import clone
+    rf  = clone(tuned_estimators["rf"])
+    gb  = clone(tuned_estimators["gb"])
+    xgb = clone(tuned_estimators["xgb"])
+    return VotingClassifier(
+        estimators=[("rf", rf), ("gb", gb), ("xgb", xgb)],
+        voting="soft",
+    )
+
+
 def train_model(model, X_train: pd.DataFrame, y_train: pd.Series):
     """Fit the model on training data.
 
